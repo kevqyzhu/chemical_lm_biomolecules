@@ -163,18 +163,8 @@ Then run:
 - `{OUTPUT_DIR}/generated_smiles_{EPOCH}_backbone.txt`: Success rate statistics
 - `{OUTPUT_DIR}/hist_*_{EPOCH}.png`: Various metric distribution plots
 
-## Notes
-
-- The pipeline assumes input SMILES strings represent protein structures
-- For large datasets, adjust `MAX_SAMPLES` and `NUM_PROCESSES` according to available computational resources
-- Model training parameters (`BATCH_SIZE`, `LEARNING_RATE`, etc.) may need tuning based on your specific dataset
-- GPU availability is assumed for model training and generation
-- Progress and error messages are printed to stdout
-
 ## Troubleshooting
 
 Common issues:
 1. **Memory errors during training**: Reduce `BATCH_SIZE` or `CONTEXT_LENGTH`
 2. **GPU out of memory**: Reduce model size (`N_LAYER`, `N_EMBD`) or `BATCH_SIZE`
-3. **Slow data processing**: Adjust `NUM_PROCESSES` based on available CPU cores
-4. **Module load errors**: Modify module loading commands to match your HPC environment
