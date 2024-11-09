@@ -1,13 +1,9 @@
-
-
-Here's a comprehensive README.md file:
-
-```markdown
 # Protein Sequence Generation Pipeline
 
 This repository contains a pipeline for converting protein SMILES to SELFIES/group SELFIES representations, training a generative model, and evaluating the generated sequences.
 
 ## Directory Structure
+
 ```
 .
 ├── python_scripts/
@@ -37,7 +33,9 @@ The pipeline consists of three main steps:
 ## Usage
 
 ### 1. Data Preparation
+
 Edit the variables in `1_prepare_data.sh`:
+
 ```bash
 INPUT_FILE="proteins.txt"           # Path to input SMILES file
 OUTPUT_DIR="data"                   # Directory for processed data
@@ -45,13 +43,17 @@ MAX_SAMPLES=2000                    # Maximum number of samples to process
 MODE="group_selfies"               # Either 'selfies' or 'group_selfies'
 NUM_PROCESSES=80                    # Number of processes for parallel computation
 ```
+
 Then run:
+
 ```bash
 ./1_prepare_data.sh
 ```
 
 ### 2. Model Training
+
 Edit the variables in `2_train_model.sh`:
+
 ```bash
 DATASET="protein_data"             # Name of your dataset
 INPUT_DIR="data"                   # Directory containing processed data
@@ -64,13 +66,17 @@ N_LAYER=12                         # Number of transformer layers
 N_EMBD=512                        # Embedding dimension
 N_HEAD=8                          # Number of attention heads
 ```
+
 Then run:
+
 ```bash
 ./2_train_model.sh
 ```
 
 ### 3. Generation and Evaluation
+
 Edit the variables in `3_generate_and_evaluate.sh`:
+
 ```bash
 DATASET="protein_data"             # Name of your dataset
 INPUT_DIR="models"                 # Directory containing trained model
@@ -78,7 +84,9 @@ OUTPUT_DIR="results"               # Directory for generation results
 EPOCH=100                         # Which epoch to generate from
 NUM_GENERATIONS=10000             # Number of sequences to generate
 ```
+
 Then run:
+
 ```bash
 ./3_generate_and_evaluate.sh
 ```
@@ -113,7 +121,9 @@ Then run:
 - datasets
 
 ### Computing Environment
+
 The scripts are designed for HPC environments with GPU support. Module loading commands in the scripts should be modified according to your specific environment:
+
 ```bash
 module --force purge
 module load StdEnv/2020 
