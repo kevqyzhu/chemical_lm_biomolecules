@@ -30,6 +30,61 @@ The pipeline consists of three main steps:
 2. **Model Training**: Train a GPT-2 model on the processed sequences
 3. **Generation & Evaluation**: Generate new sequences and evaluate their properties
 
+## Requirements
+
+### Environment Setup
+
+The project uses conda for environment management. Create the environment using the provided `environment.yml` file:
+
+```bash
+conda env create -f environment.yml
+conda activate protein-gen
+```
+
+The `environment.yml` file contains all necessary dependencies:
+
+```yaml
+name: protein-gen
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8.2
+  - pip
+  - pytorch
+  - cudatoolkit
+  - numpy
+  - pandas
+  - matplotlib
+  - pillow
+  - scipy
+  - tqdm
+  - git  # Required for installing group-selfies
+  # Core dependencies via pip
+  - pip:
+    - rdkit
+    - selfies
+    - transformers
+    - accelerate
+    - datasets
+    - git+https://github.com/aspuru-guzik-group/group-selfies.git
+```
+
+Note: The `group-selfies` package must be installed from source and is not available via PyPI. The environment file handles this by installing directly from the GitHub repository.
+
+### Computing Environment
+
+The scripts are designed for HPC environments with GPU support. Module loading commands in the scripts should be modified according to your specific environment:
+
+```bash
+module --force purge
+module load StdEnv/2020 
+module load gcc/9.3.0 
+module load arrow/8
+module load python/3.8.2
+```
+
 ## Usage
 
 ### 1. Data Preparation
@@ -107,30 +162,6 @@ Then run:
 - `{OUTPUT_DIR}/generated_smiles_{EPOCH}.txt`: Generated sequences converted to SMILES
 - `{OUTPUT_DIR}/generated_smiles_{EPOCH}_backbone.txt`: Success rate statistics
 - `{OUTPUT_DIR}/hist_*_{EPOCH}.png`: Various metric distribution plots
-
-## Requirements
-
-### Python Dependencies
-- torch
-- transformers
-- selfies
-- rdkit
-- numpy
-- matplotlib
-- accelerate
-- datasets
-
-### Computing Environment
-
-The scripts are designed for HPC environments with GPU support. Module loading commands in the scripts should be modified according to your specific environment:
-
-```bash
-module --force purge
-module load StdEnv/2020 
-module load gcc/9.3.0 
-module load arrow/8
-module load python/3.8.2
-```
 
 ## Notes
 

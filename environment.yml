@@ -1,0 +1,25 @@
+name: protein-gen
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8.2
+  - pip
+  - pytorch
+  - cudatoolkit
+  - numpy
+  - pandas
+  - matplotlib
+  - pillow
+  - scipy
+  - tqdm
+  - git
+  # Core dependencies via pip
+  - pip:
+    - rdkit
+    - selfies
+    - transformers
+    - accelerate
+    - datasets
+    - git+https://github.com/aspuru-guzik-group/group-selfies.git
