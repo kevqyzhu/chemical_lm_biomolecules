@@ -18,6 +18,10 @@ This repository contains a pipeline for converting protein SMILES to SELFIES/gro
 │   ├── primary_sequence.py
 │   ├── convert_to_smiles.py
 │   └── build_modified_proteins_datasets.py
+├── data/
+│   ├── 50_150_amino_acids.csv.zip
+│   ├── single_domain_antibodies.csv
+│   ├── zinc.txt
 ├── 1_prepare_data.sh
 ├── 2_train_model.sh
 ├── 3_generate_and_evaluate.sh
