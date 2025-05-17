@@ -1,4 +1,4 @@
-name: protein-gen
+name: clm-biomolecules
 channels:
   - pytorch
   - conda-forge

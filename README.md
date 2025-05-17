@@ -15,7 +15,9 @@ This repository contains a pipeline for converting protein SMILES to SELFIES/gro
 │   ├── generate_accelerate.py
 │   ├── metrics.py
 │   ├── group_utils.py
-│   └── primary_sequence.py
+│   ├── primary_sequence.py
+│   ├── convert_to_smiles.py
+│   └── build_modified_proteins_datasets.py
 ├── 1_prepare_data.sh
 ├── 2_train_model.sh
 ├── 3_generate_and_evaluate.sh
@@ -30,6 +32,36 @@ The pipeline consists of three main steps:
 2. **Model Training**: Train a GPT-2 model on the processed sequences
 3. **Generation & Evaluation**: Generate new sequences and evaluate their properties
 
+## Data Processing Scripts
+
+### Converting PDB to SMILES
+The `convert_to_smiles.py` script converts protein PDB files to SMILES sequences. This is useful if you want to process your own PDB files. The script uses RDKit for the conversion.
+
+To use your own PDB files:
+1. Place your PDB files in a directory
+2. Run the conversion script:
+```bash
+python convert_to_smiles.py --input_dir /path/to/pdb/files --output_file proteins.txt
+```
+
+### Protein Modification
+The `build_modified_proteins_datasets.py` script attaches small molecules to protein backbones. It can:
+- Attach modifications to specific residues (default: Lysine/K)
+- Handle multiple modifications per protein
+- Process proteins in parallel for efficiency
+
+To modify proteins:
+```bash
+python build_modified_proteins_datasets.py \
+    --input_file proteins.txt \
+    --modifications_file modifications.csv \
+    --output_file modified_proteins.txt \
+    --sample_size 100 \
+    --attachable_residue K
+```
+
+Note: Pre-processed datasets are already included in this repository. You only need to use these scripts if you want to generate your own data from custom PDB files or create new protein modifications.
+
 ## Requirements
 
 ### Environment Setup
@@ -38,13 +70,13 @@ The project uses conda for environment management. Create the environment using 
 
 ```bash
 conda env create -f environment.yml
-conda activate protein-gen
+conda activate clm-biomolecules
 ```
 
 The `environment.yml` file contains all necessary dependencies:
 
 ```yaml
-name: protein-gen
+name: clm-biomolecules
 channels:
   - pytorch
   - conda-forge

@@ -1,8 +1,12 @@
 import os, copy, random, itertools, rdkit, traceback, multiprocessing
-
 import pandas as pd
-
+import argparse
+from pathlib import Path
 from rdkit import Chem
+
+# Global variables
+global file
+global modifications_file
 
 lg = rdkit.RDLogger.logger()
 lg.setLevel(rdkit.RDLogger.CRITICAL)
@@ -143,13 +147,6 @@ def modify_protein_sidechain(protein_mol, backbone_atoms,
     emol.AddBond(protein_attach_idx, sc_attach, order=Chem.rdchem.BondType.SINGLE)
     return emol.GetMol()
 
-modifications_file = 'zinc.txt'
-#modifications_file = 'sidechain_modifications.txt'
-
-sidechain_modifications = pd.read_csv(modifications_file)['smiles']
-if 'zinc' not in modifications_file:
-    sidechain_modifications = [Chem.MolFromSmiles(s) for s in sidechain_modifications]
-
 def random_protein_modification(protein_smi):
 
     protein_mol = Chem.MolFromSmiles(protein_smi)
@@ -192,7 +189,6 @@ def log(fname, text):
     with open(fname, 'a') as f:
         f.write(text + '\n')
 
-file = 'protein_drug_conjugates.txt' if 'zinc' in modifications_file else  'unnatural_proteins.txt'
 
 def mod_protein(smile):
     try: # set nmods =0 if you want to attach to all sidechains
@@ -202,33 +198,67 @@ def mod_protein(smile):
     except:
         return ""
 
-def test():
-    file = 'single_chains_0_250_AA_95_sim_rdkit_0_2500_DS.csv'
-    file = 'single_chains.csv' # 20 MB file with 0-250 residue chains
-    import pandas as pd
-    from primary_sequence import determine_primary_structure
-    df = pd.read_csv(file)
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Modify protein structures with sidechain modifications')
+    parser.add_argument('--input_file', type=str, required=True,
+                      help='Input file containing protein SMILES (CSV or TXT)')
+    parser.add_argument('--modifications_file', type=str, required=True,
+                      help='File containing modifications (ZINC or other format)')
+    parser.add_argument('--output_file', type=str, default='protein_drug_conjugates.txt',
+                      help='Output file to save modified proteins')
+    parser.add_argument('--sample_size', type=int, default=100,
+                      help='Number of proteins to sample and modify (default: 100)')
+    parser.add_argument('--attachable_residue', type=str, default='K',
+                      help='Residue to attach modifications to (default: K)')
+    parser.add_argument('--num_processes', type=int, default=None,
+                      help='Number of processes for parallel processing (default: CPU count)')
+    return parser.parse_args()
 
-    #print(df)
-    n = random.choice(range(len(df)))
-    ids, smiles = df['pdb_id'], df['smiles']
-    id, smi = ids[n], smiles[n]
-    print(id)
-    #print(smi)
-    print('protein sequence')
-    print(determine_primary_structure(smi))
-    print('modifying protein')
-    print(random_protein_modification(smi, sidechain_modifications,
-                                      nmods = 0, attachable_residue='K'))
+def load_protein_smiles(input_file):
+    """Load protein SMILES from either CSV or TXT file."""
+    file_path = Path(input_file)
+    if file_path.suffix.lower() == '.csv':
+        df = pd.read_csv(input_file)
+        if 'smiles' not in df.columns:
+            raise ValueError("CSV file must contain a 'smiles' column")
+        return df['smiles'].tolist()
+    else:
+        with open(input_file, 'r') as f:
+            return [line.strip() for line in f if line.strip()]
 
 if __name__ == "__main__":
     #test(); exit()
 
-    train_file = 'single_chains_0_250_AA_95_sim_rdkit_0_2500_DS.csv'
-    train_file = 'single_chains.csv' # 20 MB file with 0-250 residue chains
-
-    protein_smiles = pd.read_csv(train_file)['smiles'].tolist()
-    protein_smiles = random.sample(protein_smiles, 100)
-
-    with multiprocessing.Pool() as pool:
-        pool.map(mod_protein, protein_smiles)
+    args = parse_arguments()
+    
+    # Set modifications file
+    modifications_file = args.modifications_file
+    
+    # Load sidechain modifications
+    sidechain_modifications = pd.read_csv(modifications_file)['smiles']
+    if 'zinc' not in modifications_file:
+        sidechain_modifications = [Chem.MolFromSmiles(s) for s in sidechain_modifications]
+    
+    # Load protein SMILES
+    try:
+        protein_smiles = load_protein_smiles(args.input_file)
+        print(f"Loaded {len(protein_smiles)} protein SMILES from {args.input_file}")
+    except Exception as e:
+        print(f"Error loading input file: {e}")
+        exit(1)
+    
+    # Sample proteins if needed
+    if args.sample_size and args.sample_size < len(protein_smiles):
+        protein_smiles = random.sample(protein_smiles, args.sample_size)
+        print(f"Sampled {args.sample_size} proteins for modification")
+    
+    # Set output file
+    file = args.output_file
+    
+    # Process proteins in parallel
+    with multiprocessing.Pool(processes=args.num_processes) as pool:
+        results = pool.map(mod_protein, protein_smiles)
+    
+    # Count successful modifications
+    successful_mods = sum(1 for r in results if r)
+    print(f"Successfully modified {successful_mods} out of {len(protein_smiles)} proteins")
